@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     stages {
 
         stage('Checkout') {
@@ -11,15 +15,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'sed -i -e "s/\\r$//" mvnw'
-                sh 'chmod +x mvnw'
-                sh './mvnw clean package -DskipTests'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Test') {
             steps {
-                sh './mvnw test'
+                sh 'mvn test'
             }
         }
 
