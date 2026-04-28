@@ -15,13 +15,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'docker run --rm -v $PWD:/app -w /app maven:3.9.9-eclipse-temurin-17 mvn clean package -DskipTests'
+                sh "docker run --rm -v ${WORKSPACE}:/app -w /app maven:3.9.9-eclipse-temurin-17 mvn clean package -DskipTests"
             }
         }
 
         stage('Test') {
             steps {
-                sh 'docker run --rm -v $PWD:/app -w /app maven:3.9.9-eclipse-temurin-17 mvn test'
+                sh "docker run --rm -v ${WORKSPACE}:/app -w /app maven:3.9.9-eclipse-temurin-17 mvn test"
             }
         }
 
