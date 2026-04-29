@@ -4,14 +4,13 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git url: 'https://github.com/NicolasC101/cicd-demo.git', branch: 'master'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'chmod +x mvnw'
-                sh './mvnw clean package -DskipTests'
+                sh 'sh ./mvnw clean compile -DskipTests'
             }
         }
 
@@ -23,7 +22,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh './mvnw test'
+                sh 'sh ./mvnw test'
             }
         }
     }
