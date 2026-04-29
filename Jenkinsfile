@@ -64,7 +64,7 @@ pipeline {
             steps {
                 sh '''
                     docker rm -f cicd-demo-app 2>/dev/null || true
-                    docker run -d --name cicd-demo-app -p 8081:8080 mi-app:latest
+                    docker run -d --name cicd-demo-app -e SERVER_PORT=80 -p 80:80 mi-app:latest
                 '''
             }
         }
@@ -74,6 +74,9 @@ pipeline {
         always {
             echo 'Limpiando entorno...'
             cleanWs()
+        }
+        failure {
+            echo "NOTIFICACION FALLA: ${env.JOB_NAME} #${env.BUILD_NUMBER} — ${env.BUILD_URL}"
         }
     }
 }
