@@ -1,11 +1,12 @@
 package au.com.equifax.cicddemo.controller;
 
-import au.com.equifax.cicddemo.domain.EnvDetail;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import au.com.equifax.cicddemo.domain.EnvDetail;
 
 @RestController
 public class ApiController {
@@ -17,6 +18,7 @@ public class ApiController {
         env.setHostname(inetAddress.getHostName());
         env.setIp(inetAddress.getHostAddress());
         env.setOs(System.getProperty("os.name"));
+        env.setMessage("Taller Jenkins - HOLAS");
         return env;
     }
 }
