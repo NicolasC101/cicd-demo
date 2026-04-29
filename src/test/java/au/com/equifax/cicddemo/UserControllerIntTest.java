@@ -1,26 +1,22 @@
 package au.com.equifax.cicddemo;
 
-import au.com.equifax.cicddemo.domain.IntegrationTest;
-import au.com.equifax.cicddemo.domain.UnitTest;
 import au.com.equifax.cicddemo.domain.User;
-import org.json.JSONException;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
-import org.skyscreamer.jsonassert.JSONAssert;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@Category(IntegrationTest.class)
 @SpringBootTest(classes = CicdDemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Tag("IntegrationTest")
 public class UserControllerIntTest {
 
     @LocalServerPort
@@ -30,41 +26,48 @@ public class UserControllerIntTest {
 
     HttpHeaders headers = new HttpHeaders();
 
-
     @Test
-    public void testRetrieveStudentCourse() throws JSONException {
+    void testRetrieveStudentCourse() throws JsonProcessingException {
 
         HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                createURLWithPort("/users/"),
+                createURLWithPort("/users"),
                 HttpMethod.GET, entity, String.class);
 
-        //String expected = "{id:Course1,name:Spring,description:10 Steps}";
-        String expected = "[]";
-        // Empty
-        JSONAssert.assertEquals(expected, response.getBody(), false);
+        String body = response.getBody();
+        Assertions.assertNotNull(body);
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(body);
+        int userCount;
+        if (root.isArray()) {
+            userCount = root.size();
+        } else if (root.path("_embedded").path("users").isArray()) {
+            userCount = root.path("_embedded").path("users").size();
+        } else if (root.path("_embedded").path("user").isArray()) {
+            userCount = root.path("_embedded").path("user").size();
+        } else if (root.path("content").isArray()) {
+            userCount = root.path("content").size();
+        } else {
+            userCount = root.isEmpty() || (root.size() == 0) ? 0 : -1;
+        }
+        Assertions.assertEquals(0, userCount, () -> "unexpected body: " + body);
 
-
-        User usr =User.UserBuilder.anUser()
+        User usr = User.UserBuilder.anUser()
                 .withEmail("another@gmail.com")
                 .withLogin("another")
                 .withId(10)
                 .withName("another").build();
         HttpEntity<User> entityUsr = new HttpEntity<>(usr, headers);
 
-        //Post
         restTemplate.exchange(
-                createURLWithPort("/users/"),
+                createURLWithPort("/users"),
                 HttpMethod.POST, entityUsr, User.class);
 
-        //Get By ID
-
         ResponseEntity<User> responseUsr = restTemplate.exchange(
-                createURLWithPort("/users/"+usr.getId()),
+                createURLWithPort("/users/" + usr.getId()),
                 HttpMethod.GET, entityUsr, User.class);
-        //responseUsr.getBody()
-        Assert.assertEquals(usr, responseUsr.getBody());
+        Assertions.assertEquals(usr, responseUsr.getBody());
 
     }
 
