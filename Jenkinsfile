@@ -26,7 +26,8 @@ pipeline {
                         ./mvnw sonar:sonar \
                           -Dsonar.projectKey=cicd-demo \
                           -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.token=$SONAR_TOKEN
+                          -Dsonar.token=$SONAR_TOKEN \
+                          -Dsonar.qualitygate.wait=true
                     '''
                 }
             }
@@ -45,6 +46,8 @@ pipeline {
                       -v /var/run/docker.sock:/var/run/docker.sock \
                       aquasec/trivy:latest image \
                       --scanners vuln \
+                      --severity CRITICAL \
+                      --exit-code 1 \
                       --no-progress \
                       mi-app:latest
                 '''
