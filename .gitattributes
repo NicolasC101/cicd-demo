@@ -1,0 +1,3 @@
+# Forzar LF en los scripts
+*.sh text eol=lf
+mvnw text eol=lf
