@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/NicolasC101/cicd-demo.git', branch: 'master'
-            }
-        }
-
         stage('Build') {
             steps {
+                // Asegurar LF en mvnw (por si Git no aplicó .gitattributes)
+                sh '''if [ -f mvnw ]; then
+                        sed -i "s/\\r//" mvnw
+                        chmod +x mvnw
+                      fi
+                '''
                 sh 'sh ./mvnw clean compile -DskipTests'
             }
         }
@@ -24,6 +24,12 @@ pipeline {
             steps {
                 sh 'sh ./mvnw test'
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finalizado.'
         }
     }
 }
